@@ -877,7 +877,7 @@ void light_process_spot(uint idx, vec3 vertex, vec3 eye_vec, vec3 normal, vec3 v
 		vec4 splane = (spot_lights.data[idx].shadow_matrix * vec4(vertex, 1.0));
 		splane /= splane.w;
 
-		vec2 proj_uv = normal_to_panorama(splane.xyz) * spot_lights.data[idx].projector_rect.zw;
+		vec2 proj_uv = splane.xy * spot_lights.data[idx].projector_rect.zw;
 
 		if (sc_projector_use_mipmaps) {
 			//ensure we have proper mipmaps
