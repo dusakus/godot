@@ -155,14 +155,14 @@ Files extracted from upstream source:
 ## freetype
 
 - Upstream: https://www.freetype.org
-- Version: 2.10.4 (6a2b3e4007e794bfc6c91030d0ed987f925164a8, 2020)
+- Version: 2.11.1 (3f83daeecb1a78d851b660eed025eeba362c0e4a, 2021)
 - License: FreeType License (BSD-like)
 
 Files extracted from upstream source:
 
-- the `src/` folder, stripped of the `Jamfile` files and the `tools` subfolder
-- the `include/` folder
-- `docs/{FTL.TXT,LICENSE.TXT}`
+- the `src/` folder, minus the `.mk` files and the `dlg` and `tools` subfolders
+- the `include/` folder, minus the `dlg` subfolder
+- `LICENSE.TXT` and `docs/FTL.TXT`
 
 
 ## glslang
@@ -477,19 +477,6 @@ Files extracted from the upstream source:
 - Files in `core/` folder.
 - `LICENSE.txt` and `CHANGELOG.md`
 
-
-## nanosvg
-
-- Upstream: https://github.com/memononen/nanosvg
-- Version: git (ccdb1995134d340a93fb20e3a3d323ccb3838dd0, 2021)
-- License: zlib
-
-Files extracted from the upstream source:
-
-- All .h files in `src/`
-- LICENSE.txt
-
-
 ## oidn
 
 - Upstream: https://github.com/OpenImageDenoise/oidn
@@ -626,6 +613,18 @@ Files extracted from upstream source:
 
 The `tinyexr.cc` file was modified to include `zlib.h` which we provide,
 instead of `miniz.h` as an external dependency.
+
+
+## thorvg
+
+- Upstream: https://github.com/Samsung/thorvg
+- Version: 0.7.0 (e527f565b770f0a41df821e6618ccaeea94f465e, 2021)
+- License: MIT
+
+Files extracted from upstream source:
+
+See `thorvg/update-thorvg.sh` for extraction instructions. Set the version
+number and run the script.
 
 
 ## vhacd
