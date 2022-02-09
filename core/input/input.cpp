@@ -190,32 +190,37 @@ void Input::VelocityTrack::update(const Vector2 &p_delta_p) {
 	float delta_t = tdiff / 1000000.0;
 	last_tick = tick;
 
+	if (delta_t > max_ref_frame) {
+		// First movement in a long time, reset and start again.
+		velocity = Vector2();
+		accum = p_delta_p;
+		accum_t = 0;
+		return;
+	}
+
 	accum += p_delta_p;
 	accum_t += delta_t;
 
-	if (accum_t > max_ref_frame * 10) {
-		accum_t = max_ref_frame * 10;
+	if (accum_t < min_ref_frame) {
+		// Not enough time has passed to calculate speed precisely.
+		return;
 	}
 
-	while (accum_t >= min_ref_frame) {
-		float slice_t = min_ref_frame / accum_t;
-		Vector2 slice = accum * slice_t;
-		accum = accum - slice;
-		accum_t -= min_ref_frame;
-
-		velocity = (slice / min_ref_frame).lerp(velocity, min_ref_frame / max_ref_frame);
-	}
+	velocity = accum / accum_t;
+	accum = Vector2();
+	accum_t = 0;
 }
 
 void Input::VelocityTrack::reset() {
 	last_tick = OS::get_singleton()->get_ticks_usec();
 	velocity = Vector2();
+	accum = Vector2();
 	accum_t = 0;
 }
 
 Input::VelocityTrack::VelocityTrack() {
 	min_ref_frame = 0.1;
-	max_ref_frame = 0.3;
+	max_ref_frame = 3.0;
 	reset();
 }
 
@@ -518,18 +523,20 @@ void Input::_parse_input_event_impl(const Ref<InputEvent> &p_event, bool p_is_em
 	Ref<InputEventMouseMotion> mm = p_event;
 
 	if (mm.is_valid()) {
-		Point2 pos = mm->get_global_position();
-		if (mouse_pos != pos) {
-			set_mouse_position(pos);
+		Point2 position = mm->get_global_position();
+		if (mouse_pos != position) {
+			set_mouse_position(position);
 		}
+		Vector2 relative = mm->get_relative();
+		mouse_velocity_track.update(relative);
 
 		if (event_dispatch_function && emulate_touch_from_mouse && !p_is_emulated && (mm->get_button_mask() & MouseButton::LEFT) != MouseButton::NONE) {
 			Ref<InputEventScreenDrag> drag_event;
 			drag_event.instantiate();
 
-			drag_event->set_position(mm->get_position());
-			drag_event->set_relative(mm->get_relative());
-			drag_event->set_velocity(mm->get_velocity());
+			drag_event->set_position(position);
+			drag_event->set_relative(relative);
+			drag_event->set_velocity(get_last_mouse_velocity());
 
 			event_dispatch_function(drag_event);
 		}
@@ -710,7 +717,6 @@ void Input::set_gyroscope(const Vector3 &p_gyroscope) {
 }
 
 void Input::set_mouse_position(const Point2 &p_posf) {
-	mouse_velocity_track.update(p_posf - mouse_pos);
 	mouse_pos = p_posf;
 }
 
@@ -718,7 +724,8 @@ Point2 Input::get_mouse_position() const {
 	return mouse_pos;
 }
 
-Point2 Input::get_last_mouse_velocity() const {
+Point2 Input::get_last_mouse_velocity() {
+	mouse_velocity_track.update(Vector2());
 	return mouse_velocity_track.velocity;
 }
 
